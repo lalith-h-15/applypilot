@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Check, AlertTriangle, X, ShieldCheck, ShieldAlert } from "lucide-react";
 import { getOpportunity } from "./api";
@@ -88,7 +88,7 @@ export default function OpportunityDetail() {
     };
   }, [id]);
 
-  if (state === "loading") return <Shell><p className="od-note">Loading opportunity…</p></Shell>;
+  if (state === "loading") return <Shell><p className="od-note">Loading opportunityΓÇª</p></Shell>;
   if (state === "missing") return <Shell><p className="od-note">We couldn't find this opportunity.</p></Shell>;
   if (state === "error")
     return <Shell><p className="od-note">Couldn't load this opportunity. Check your connection and refresh.</p></Shell>;

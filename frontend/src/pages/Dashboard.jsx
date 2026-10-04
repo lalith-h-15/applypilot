@@ -1,4 +1,4 @@
-
+import { Link } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -505,9 +505,18 @@ async function handleSave(item) {
 
                     {/* Role, location and skill comparison */}
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                        {item.title}
-                      </p>
+                      {/^[a-f\d]{24}$/i.test(item.id) ? (
+  <Link
+    to={`/opportunities/${item.id}`}
+    className="block text-xs font-semibold text-[var(--text-primary)] truncate hover:text-ap-blue"
+  >
+    {item.title}
+  </Link>
+) : (
+  <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+    {item.title}
+  </p>
+)}
 
                       <p className="text-[10px] text-ap-gray-400 flex items-center gap-1 mt-0.5">
                         <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
