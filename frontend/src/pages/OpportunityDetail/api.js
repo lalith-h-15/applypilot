@@ -24,11 +24,26 @@ const variants = {
 };
 
 // Returns the opportunity, or null if it doesn't exist.
+// Converts backend JSON into the shape the page expects.
+function normalize(raw) {
+  return {
+    id: raw._id ?? raw.id,
+    title: raw.title,
+    company: raw.company,
+    priority: raw.priority,
+    jdText: raw.jdText ?? raw.description,
+    eligibility: raw.eligibility,
+    matchScore: raw.matchScore,
+    skills: raw.skills,
+    verified: raw.verified,
+    canPrepare: raw.canPrepare,
+  };
+}
 export async function getOpportunity(id) {
   if (USE_MOCK) {
     if (id === "missing") return null;
     if (id === "error") throw new Error("Test error");
-    return { ...mockOpportunity, ...variants[id], id };
+ return normalize(await res.json());
   }
   const res = await fetch(`${BASE}/api/opportunities/${id}`);
   if (res.status === 404) return null;
