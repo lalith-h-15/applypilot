@@ -1,0 +1,119 @@
+/* Inter should live once in index.html eventually; this import keeps the page standalone for now. */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap");
+
+.od {
+  --bg: #f8fafc;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --border: #e2e8f0;
+  --accent: #4f46e5;
+  --accent-dark: #4338ca;
+  --green: #15803d;
+  --green-bg: #f0fdf4;
+  --amber: #b45309;
+  --amber-bg: #fffbeb;
+  --red: #b91c1c;
+  --red-bg: #fef2f2;
+  --radius: 12px;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+
+  box-sizing: border-box;
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, sans-serif;
+  font-size: 14px;
+  text-align: left;
+  color-scheme: light;
+  line-height: 1.5;
+}
+.od *, .od *::before, .od *::after { box-sizing: inherit; }
+.od h1, .od h2, .od h4 { color: var(--text); }
+
+.od-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--muted); text-decoration: none; margin-bottom: 16px;
+}
+.od-back:hover { color: var(--text); }
+.od-note { color: var(--muted); }
+
+/* Header */
+.od-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+.od-head h1 { font-size: 24px; font-weight: 600; }
+.od-company { color: var(--muted); margin-top: 2px; }
+.od-priority { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; white-space: nowrap; }
+.od-priority i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.od-priority.HIGH { color: #c2410c; }
+.od-priority.HIGH i { background: #ea580c; }
+
+/* Layout */
+.od-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+.od-side { display: flex; flex-direction: column; gap: 16px; }
+.od-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px;
+}
+.od-card h2 { font-size: 15px; font-weight: 600; }
+.od-split { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.od-hint { color: var(--muted); font-size: 13px; margin: 4px 0 12px; }
+
+/* Job description */
+.od-jd { white-space: pre-wrap; margin-top: 12px; max-width: 70ch; }
+.od-jd mark { background: #e0e7ff; color: inherit; border-radius: 4px; padding: 1px 2px; }
+
+/* Rows (skills + eligibility checks) */
+.od-group h4 { font-size: 13px; font-weight: 500; color: var(--muted); margin: 12px 0 4px; }
+.od-row {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 8px 10px; border: 1px solid transparent; border-radius: 8px;
+  background: none; font: inherit; color: inherit; text-align: left; cursor: pointer;
+}
+.od-row:hover { background: var(--bg); }
+.od-row.active { background: #eef2ff; border-color: #c7d2fe; }
+.od-row:focus-visible, .od-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.od-name { font-weight: 500; }
+.od-sub { margin-left: auto; color: var(--muted); font-size: 13px; }
+.od-mark {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%; flex: none;
+  border: 1.5px solid var(--border); font-size: 11px; font-weight: 600; color: #fff;
+}
+.od-mark.green { background: #16a34a; border-color: #16a34a; }
+.od-mark.amber { background: #d97706; border-color: #d97706; }
+.od-mark.red { background: #dc2626; border-color: #dc2626; }
+
+/* Badges + verification */
+.od-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 500;
+}
+.od-badge.green { background: var(--green-bg); color: var(--green); }
+.od-badge.amber { background: var(--amber-bg); color: var(--amber); }
+.od-badge.red { background: var(--red-bg); color: var(--red); }
+.od-verify {
+  display: flex; align-items: center; gap: 8px; margin-top: 16px;
+  padding-top: 12px; border-top: 1px solid var(--border); font-weight: 500;
+}
+.od-verify.ok { color: var(--green); }
+.od-verify.warn { color: var(--amber); }
+
+/* Match score */
+.od-score { font-size: 22px; font-weight: 600; }
+.od-bar { height: 8px; background: var(--border); border-radius: 999px; overflow: hidden; }
+.od-bar div { height: 100%; background: var(--accent); }
+
+/* Button */
+.od-btn {
+  padding: 10px 16px; border: 0; border-radius: 10px;
+  background: var(--accent); color: #fff; font: inherit; font-weight: 500; cursor: pointer;
+}
+.od-btn:hover:not(:disabled) { background: var(--accent-dark); }
+.od-btn:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+@media (max-width: 860px) {
+  .od { padding: 16px; }
+  .od-grid { grid-template-columns: 1fr; }
+  .od-head { flex-direction: column; }
+}
