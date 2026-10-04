@@ -1,13 +1,471 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApplyPilot - Vikas Module Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-section">
+        <div class="brand-logo">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div>
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <h1 class="brand-title">ApplyPilot</h1>
+            <span class="brand-badge">Vikas Module</span>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-top:2px;">
+            Target: <strong id="header-target-role" style="color:#f1f5f9;">Full-Stack Engineer</strong> at <strong id="header-target-company" style="color:#f1f5f9;">Stripe</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-status-bar">
+        <!-- System status -->
+        <span id="badge-system-status" class="badge badge-state-needs-input">
+          <span style="font-size:0.65rem; color:var(--text-muted);">SYSTEM:</span>
+          <span id="txt-system-status">Needs input</span>
+        </span>
+
+        <!-- Manual status -->
+        <span id="badge-manual-status" class="badge badge-manual">
+          <span style="font-size:0.65rem; color:var(--text-muted);">MANUAL:</span>
+          <span id="txt-manual-status">None</span>
+        </span>
+
+        <!-- Version -->
+        <span id="badge-version" class="badge badge-version">v1</span>
+
+        <!-- Integrity Hash preview -->
+        <span id="badge-hash" class="badge badge-hash" title="Click to inspect Canonical Payload" onclick="openPayloadModal()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span id="txt-hash-short">SHA-256: loading...</span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Interactive Guided Demo Bar -->
+    <section class="demo-banner">
+      <div class="demo-banner-header">
+        <div class="demo-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Interactive 9-Step Demo Walkthrough
+        </div>
+        <button class="btn-reset" onclick="resetDemo()">
+          ↺ Reset Demo Database
+        </button>
+      </div>
+
+      <div class="demo-steps-grid">
+        <button class="btn-demo-step" onclick="demoStep(1)" id="step-btn-1">
+          <span class="step-num">Step 1</span>
+          Submit Unapproved (403)
+        </button>
+        <button class="btn-demo-step" onclick="demoStep(2)" id="step-btn-2">
+          <span class="step-num">Step 2</span>
+          Student Approval
+        </button>
+        <button class="btn-demo-step" onclick="demoStep(3)" id="step-btn-3">
+          <span class="step-num">Step 3</span>
+          Verify Token & Hash
+        </button>
+        <button class="btn-demo-step" onclick="demoStep(4)" id="step-btn-4">
+          <span class="step-num">Step 4</span>
+          Submit Successfully
+        </button>
+        <button class="btn-demo-step" onclick="demoStep(5)" id="step-btn-5">
+          <span class="step-num">Step 5</span>
+          Idempotency (Submit Again)
+        </button>
+        <button class="btn-demo-step" onclick="demoStep(6)" id="step-btn-6">
+          <span class="step-num">Step 6</span>
+          Edit After Approval
+        </button>
+        <button class="btn-demo-step" onclick="demoStep(7)" id="step-btn-7">
+          <span class="step-num">Step 7</span>
+          Hash & Version Diff
+        </button>
+        <button class="btn-demo-step" onclick="demoStep(8)" id="step-btn-8">
+          <span class="step-num">Step 8</span>
+          Inspect Activity Log
+        </button>
+        <button class="btn-demo-step" onclick="demoStep(9)" id="step-btn-9">
+          <span class="step-num">Step 9</span>
+          Tracker State Transitions
+        </button>
+      </div>
+    </section>
+
+    <!-- Main Grid: Preparation & Security -->
+    <div class="main-grid">
+      <!-- Left Column: Application Preparation -->
+      <section class="card" id="section-preparation">
+        <div class="card-header">
+          <div>
+            <h2 class="card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              1. Application Preparation
+            </h2>
+            <p class="card-subtitle">Generated answers, evidence traceability, and claim validation</p>
+          </div>
+          <button class="btn btn-secondary" style="font-size:0.75rem; padding:0.35rem 0.65rem;" onclick="openEditAnswersModal()">
+            ✎ Edit Answers
+          </button>
+        </div>
+
+        <!-- Candidate Profile Snapshot -->
+        <div style="background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.875rem;">
+          <div style="font-size:0.75rem; color:var(--text-secondary); margin-bottom:0.35rem; display:flex; justify-content:space-between;">
+            <span>Candidate: <strong>Vikas Sajjan</strong></span>
+            <span>Profile ID: <code style="font-family:var(--font-mono); color:#93c5fd;">CAND-VIKAS-01</code></span>
+          </div>
+          <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:0.25rem;">VERIFIED SKILLS IN PROFILE:</div>
+          <div class="profile-pill-container" id="candidate-skills-list"></div>
+
+          <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.6rem; margin-bottom:0.25rem;">VERIFIED WORK EXPERIENCE:</div>
+          <div id="candidate-exp-list" style="font-size:0.75rem; color:#cbd5e1;"></div>
+        </div>
+
+        <!-- Critical Rule Notice -->
+        <div class="rule-highlight-box">
+          <strong>Validation Rule:</strong> Never convert a skill-list entry into an unsupported experience claim.<br>
+          <em>Example:</em> "React" in skills can support <em>"React is listed as a skill"</em>, but <strong>cannot</strong> support <em>"I built applications using React"</em> without verified work/project evidence.
+        </div>
+
+        <!-- Missing Information Alert Box -->
+        <div class="missing-info-box" id="missing-info-container">
+          <div class="missing-info-title">⚠️ Missing Information & Action Items Detected:</div>
+          <ul class="missing-info-list" id="missing-info-list"></ul>
+        </div>
+
+        <!-- Generated Answers & Claims Breakdown -->
+        <div style="display:flex; flex-direction:column; gap:0.75rem;" id="answers-container">
+          <!-- Filled dynamically by JavaScript -->
+        </div>
+
+        <!-- Live Claim Validator Tester -->
+        <div style="background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:0.875rem; margin-top:0.5rem;">
+          <div style="font-size:0.75rem; font-weight:700; color:#38bdf8; margin-bottom:0.4rem; display:flex; align-items:center; gap:0.35rem;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            Live Claim Rule Engine Tester
+          </div>
+          <p style="font-size:0.72rem; color:var(--text-secondary); margin-bottom:0.5rem;">
+            Test any sentence to see how the rule engine enforces skill vs. experience claims.
+          </p>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="custom-claim-input" placeholder="e.g. I built applications using React for 2 years" style="flex:1; background:#0b0f19; border:1px solid #334155; border-radius:var(--radius-sm); color:#ffffff; padding:0.45rem 0.65rem; font-size:0.78rem;">
+            <button class="btn btn-primary" style="padding:0.45rem 0.75rem; font-size:0.75rem;" onclick="testCustomClaim()">
+              Test Rule
+            </button>
+          </div>
+          <div id="custom-claim-result" style="margin-top:0.5rem; display:none;"></div>
+        </div>
+      </section>
+
+      <!-- Right Column: Approval & Submission Flow -->
+      <div style="display:flex; flex-direction:column; gap:1.5rem;">
+        <!-- Card 2: Approval Flow -->
+        <section class="security-shield-card" id="section-approval">
+          <div class="card-header" style="border-color:rgba(99, 102, 241, 0.3);">
+            <div>
+              <h2 class="card-title" style="color:#c7d2fe;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                2. Approval & Cryptographic Integrity
+              </h2>
+              <p class="card-subtitle" style="color:#a5b4fc;">Server-enforced approval, SHA-256 hash, and single-use token</p>
+            </div>
+            <span class="badge" style="background:rgba(99, 102, 241, 0.2); border-color:#6366f1; color:#c7d2fe;">
+              Version <strong id="approval-version-num" style="margin-left:2px;">v1</strong>
+            </span>
+          </div>
+
+          <!-- SHA-256 Display Box -->
+          <div class="hash-display-box">
+            <div class="hash-label">
+              <span>SHA-256 Integrity Hash (Canonical Application Payload)</span>
+              <a href="javascript:void(0)" onclick="openPayloadModal()" style="color:#38bdf8; text-decoration:none; font-size:0.65rem;">[Inspect Payload]</a>
+            </div>
+            <div class="hash-hex" id="approval-full-hash">computing hash...</div>
+          </div>
+
+          <!-- Deadline Display -->
+          <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(15, 23, 42, 0.5); padding:0.6rem 0.85rem; border-radius:var(--radius-sm); border:1px solid #1e293b; font-size:0.78rem;">
+            <div>
+              <span style="color:var(--text-secondary);">Opportunity Deadline:</span>
+              <strong id="approval-deadline-text" style="color:#f8fafc; margin-left:0.35rem;">In 48 hours</strong>
+            </div>
+            <button class="btn btn-secondary" style="font-size:0.7rem; padding:0.25rem 0.5rem;" onclick="toggleDeadlineExpired()">
+              Toggle Deadline (Past/Future)
+            </button>
+          </div>
+
+          <!-- Student Approval Checklist -->
+          <div class="checklist-container">
+            <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:0.04em;">
+              Student Approval Checklist (Server Enforced)
+            </div>
+            <label class="check-item">
+              <input type="checkbox" id="chk-student-reviewed" onchange="updateApprovalBtnState()">
+              <span><strong>Requirement 1:</strong> Student reviewed application answers, supporting evidence, and claims.</span>
+            </label>
+            <label class="check-item">
+              <input type="checkbox" id="chk-student-approved" onchange="updateApprovalBtnState()">
+              <span><strong>Requirement 2:</strong> Student approves submission and authorizes ApplyPilot to submit.</span>
+            </label>
+          </div>
+
+          <!-- Approve Button -->
+          <div style="display:flex; gap:0.75rem; align-items:center;">
+            <button class="btn btn-success" id="btn-approve-application" style="flex:1;" onclick="executeApprove()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              Approve & Issue Single-Use Token
+            </button>
+          </div>
+
+          <!-- Token Display (Hidden when not approved) -->
+          <div class="token-issued-box" id="token-issued-container" style="display:none;">
+            <div class="token-issued-label">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              ACTIVE SINGLE-USE APPROVAL TOKEN (Bound to SHA-256 Hash)
+            </div>
+            <div class="token-val" id="token-val-text"></div>
+            <div style="font-size:0.7rem; color:#6ee7b7; margin-top:2px;" id="token-expires-text"></div>
+          </div>
+        </section>
+
+        <!-- Card 3: Submission & Idempotency -->
+        <section class="submission-card" id="section-submission">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" stroke-width="2">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+                3. Submission & Idempotent Portal Simulation
+              </h2>
+              <p class="card-subtitle">Server-side 403 guard, single-use token consumption, idempotent receipt return</p>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+            <button class="btn btn-primary" id="btn-submit-action" onclick="executeSubmit()" style="flex:1;">
+              🚀 Submit Application (Simulated)
+            </button>
+            <button class="btn btn-secondary" onclick="executeSubmit()" title="Submits again to test idempotency">
+              ↻ Submit Again (Idempotency Test)
+            </button>
+          </div>
+
+          <!-- Raw Server HTTP Response Console -->
+          <div class="response-inspector" id="response-inspector-card">
+            <div class="resp-header">
+              <span>Server-Side Response Console</span>
+              <span id="resp-status-badge" style="font-weight:700;">Awaiting Action</span>
+            </div>
+            <pre class="resp-body" id="resp-body-text">{ "status": "Ready to test submission security" }</pre>
+          </div>
+
+          <!-- Submission Receipt Card -->
+          <div class="receipt-box" id="receipt-display-card" style="display:none;">
+            <div class="receipt-header">
+              <span style="font-size:0.85rem; font-weight:700; color:#a7f3d0; display:flex; align-items:center; gap:0.35rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                OFFICIAL SUBMISSION RECEIPT
+              </span>
+              <span class="badge" id="receipt-idempotency-badge" style="background:rgba(16, 185, 129, 0.2); border-color:#10b981; color:#6ee7b7;">
+                ORIGINAL SUBMISSION
+              </span>
+            </div>
+            <div class="receipt-field">
+              <span class="lbl">Receipt ID:</span>
+              <span class="val" id="rcpt-id-val" style="color:#67e8f9;">-</span>
+            </div>
+            <div class="receipt-field">
+              <span class="lbl">Application ID:</span>
+              <span class="val" id="rcpt-app-id-val">-</span>
+            </div>
+            <div class="receipt-field">
+              <span class="lbl">Version Submitted:</span>
+              <span class="val" id="rcpt-version-val">-</span>
+            </div>
+            <div class="receipt-field">
+              <span class="lbl">Tamper-Proof SHA-256:</span>
+              <span class="val" id="rcpt-hash-val" style="font-size:0.7rem; color:#d8b4fe;">-</span>
+            </div>
+            <div class="receipt-field">
+              <span class="lbl">Submitted At:</span>
+              <span class="val" id="rcpt-timestamp-val">-</span>
+            </div>
+            <div class="receipt-field">
+              <span class="lbl">Portal Confirmation:</span>
+              <span class="val" id="rcpt-conf-val" style="color:#a7f3d0;">-</span>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- Section 4: Application Tracker -->
+    <section class="tracker-section" id="section-tracker">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 14 14"></polyline>
+            </svg>
+            4. Application Tracker
+          </h2>
+          <p class="card-subtitle">Separate tracking for automated System States and manual recruiter workflow</p>
+        </div>
+      </div>
+
+      <div style="font-size:0.75rem; font-weight:700; color:var(--text-secondary); text-transform:uppercase; letter-spacing:0.05em; margin-top:0.5rem;">
+        Automated Machine System States
+      </div>
+      <div class="pipeline-wrapper">
+        <div class="pipeline-step" id="step-state-Prepared">
+          <div class="step-circle">1</div>
+          <div class="step-label">Prepared</div>
+        </div>
+        <div class="pipeline-step" id="step-state-Needs input">
+          <div class="step-circle">2</div>
+          <div class="step-label">Needs input</div>
+        </div>
+        <div class="pipeline-step" id="step-state-Awaiting approval">
+          <div class="step-circle">3</div>
+          <div class="step-label">Awaiting approval</div>
+        </div>
+        <div class="pipeline-step" id="step-state-Approved">
+          <div class="step-circle">4</div>
+          <div class="step-label">Approved</div>
+        </div>
+        <div class="pipeline-step" id="step-state-Submitted">
+          <div class="step-circle">5</div>
+          <div class="step-label">Submitted</div>
+        </div>
+        <div class="pipeline-step" id="step-state-Expired">
+          <div class="step-circle">!</div>
+          <div class="step-label">Expired</div>
+        </div>
+      </div>
+
+      <!-- Manual States Separate Controls -->
+      <div class="manual-status-controls">
+        <span style="font-size:0.75rem; font-weight:700; color:#67e8f9; text-transform:uppercase; letter-spacing:0.05em;">
+          Manual Recruiter States (Independent of System States):
+        </span>
+        <button class="btn-manual-toggle" onclick="setManualStatus(null)" id="btn-manual-none">None</button>
+        <button class="btn-manual-toggle" onclick="setManualStatus('Interview')" id="btn-manual-Interview">Interview</button>
+        <button class="btn-manual-toggle" onclick="setManualStatus('Selected')" id="btn-manual-Selected">Selected</button>
+        <button class="btn-manual-toggle" onclick="setManualStatus('Rejected')" id="btn-manual-Rejected">Rejected</button>
+      </div>
+    </section>
+
+    <!-- Section 5: Real-time Activity Log -->
+    <section class="activity-log-card" id="section-activity-log">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            5. Real-Time Activity Log (Audit Trail)
+          </h2>
+          <p class="card-subtitle">Immutable chronological audit log capturing all lifecycle and security events</p>
+        </div>
+        <button class="btn btn-secondary" style="font-size:0.75rem; padding:0.35rem 0.65rem;" onclick="refreshLogs()">
+          ↻ Refresh Logs
+        </button>
+      </div>
+
+      <div class="log-stream" id="activity-log-stream">
+        <!-- Log entries injected dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Edit Application Answers -->
+  <div class="modal-overlay" id="modal-edit-answers">
+    <div class="modal-window">
+      <div class="card-header">
+        <h3 class="card-title">Edit Application Answers</h3>
+        <button class="btn-secondary" style="padding:0.25rem 0.5rem; border-radius:var(--radius-sm);" onclick="closeEditAnswersModal()">✕</button>
+      </div>
+      <p style="font-size:0.8rem; color:#fca5a5; background:rgba(239, 68, 68, 0.1); border-left:3px solid #ef4444; padding:0.5rem 0.75rem;">
+        ⚠️ <strong>Security Notice:</strong> Any modification after approval will immediately invalidate previous approvals and tokens, incrementing the version number and recomputing the SHA-256 hash.
+      </p>
+
+      <div id="modal-edit-fields" style="display:flex; flex-direction:column; gap:1rem;">
+        <!-- Injected dynamically -->
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem;">
+        <button class="btn btn-secondary" onclick="closeEditAnswersModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEditedAnswers()">Save Changes & Update Version</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Inspect Canonical Payload & SHA-256 -->
+  <div class="modal-overlay" id="modal-payload">
+    <div class="modal-window">
+      <div class="card-header">
+        <h3 class="card-title">Canonical SHA-256 Payload Inspector</h3>
+        <button class="btn-secondary" style="padding:0.25rem 0.5rem; border-radius:var(--radius-sm);" onclick="closePayloadModal()">✕</button>
+      </div>
+      <p style="font-size:0.8rem; color:var(--text-secondary);">
+        The SHA-256 integrity hash is calculated mathematically over this sorted, deterministic canonical JSON string:
+      </p>
+
+      <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);" id="modal-hash-full"></div>
+      <pre style="background:#080c14; border:1px solid #1e293b; border-radius:var(--radius-md); padding:0.875rem; font-family:var(--font-mono); font-size:0.75rem; color:#93c5fd; max-height:300px; overflow-y:auto; white-space:pre-wrap;" id="modal-payload-content"></pre>
+
+      <div style="display:flex; justify-content:flex-end;">
+        <button class="btn btn-secondary" onclick="closePayloadModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
 </html>
