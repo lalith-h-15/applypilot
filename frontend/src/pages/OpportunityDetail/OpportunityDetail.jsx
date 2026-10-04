@@ -80,7 +80,6 @@ export default function OpportunityDetail() {
       .then((d) => {
         if (stale) return;
         setData(d);
-        setQuote(d?.skills?.[0]?.quote ?? null);
         setState(d ? "ready" : "missing");
       })
       .catch(() => !stale && setState("error"));
@@ -97,7 +96,6 @@ export default function OpportunityDetail() {
   const status = STATUS[data.eligibility.status] ?? STATUS.UNCLEAR;
   const required = data.skills.filter((s) => s.type === "required");
   const preferred = data.skills.filter((s) => s.type === "preferred");
-  const extracted = quote ? data.skills.filter((s) => s.quote === quote) : [];
 
   return (
     <Shell>
