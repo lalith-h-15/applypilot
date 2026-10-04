@@ -1,0 +1,16 @@
+﻿# Dependencies
+**/node_modules/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Build output
+**/dist/
+
+# Logs
+*.log
+
+# Backup of the accidentally created .gitignore directory
+.gitignore-backup/

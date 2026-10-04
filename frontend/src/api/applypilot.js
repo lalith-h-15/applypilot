@@ -1,243 +1,258 @@
 /**
- * applypilot.js — Data access layer for ApplyPilot.
+ * applypilot.js — ApplyPilot API data access.
  *
- * ARCHITECTURE RULE:
- *   - UI components call ONLY functions exported from this file.
- *   - No component ever computes eligibility, match score, or priority.
- *   - All such values come from the backend (or mock data below).
+ * Opportunity eligibility, matching and priority come from the backend.
+ * This file does not fabricate applications, interviews or activity logs.
  *
- * TO CONNECT REAL BACKEND:
- *   1. Set useMock = false
- *   2. Set API_BASE to your backend URL
- *   That's it — no UI code changes needed.
+ * Current limitation:
+ * The student profile below is a configured demo profile, not a
+ * profile loaded dynamically from a user's account.
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-const useMock  = true; // ← flip to false when backend is ready
+const API_BASE =
+  import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
-const mockDelay = (ms = 550) => new Promise((r) => setTimeout(r, ms));
-
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-
-const MOCK_APPLICATIONS = [
-  {
-    id: '1',
-    company: { name: 'Google',    initials: 'G', color: '#4285F4' },
-    title: 'Staff Product Designer',
-    workMode: 'Remote',
-    location: 'Mountain View, CA',
-    compensation: { base: '$220K', equity: '+$80K RSU' },
-    matchScore: 98,
-    status: 'Eligible',
-    priority: 'HIGH',
-    interviewDetail: null, interviewTime: null,
-    atsTarget: null, submittedAt: null,
-    inputReason: null, exclusionReason: null,
-  },
-  {
-    id: '2',
-    company: { name: 'Stripe',    initials: 'S', color: '#635BFF' },
-    title: 'Lead UX Engineer',
-    workMode: 'Hybrid',
-    location: 'San Francisco, CA',
-    compensation: { base: '$195K', equity: '+$60K RSU' },
-    matchScore: 94,
-    status: 'Interview Scheduled',
-    priority: 'HIGH',
-    interviewDetail: 'Round 2 · Design Review',
-    interviewTime: 'Oct 8, 2:00 PM',
-    atsTarget: null, submittedAt: null,
-    inputReason: null, exclusionReason: null,
-  },
-  {
-    id: '3',
-    company: { name: 'Figma',     initials: 'F', color: '#F24E1E' },
-    title: 'Design Systems Lead',
-    workMode: 'Hybrid',
-    location: 'New York, NY',
-    compensation: { base: '$210K', equity: '+$70K RSU' },
-    matchScore: 91,
-    status: 'Submitted',
-    priority: 'HIGH',
-    atsTarget: 'Greenhouse',
-    submittedAt: 'Oct 3',
-    interviewDetail: null, interviewTime: null,
-    inputReason: null, exclusionReason: null,
-  },
-  {
-    id: '4',
-    company: { name: 'Linear',    initials: 'L', color: '#5E6AD2' },
-    title: 'Senior Product Designer',
-    workMode: 'Remote',
-    location: 'Remote, US',
-    compensation: { base: '$175K', equity: '+$40K RSU' },
-    matchScore: 88,
-    status: 'Needs Input',
-    priority: 'NORMAL',
-    inputReason: 'Custom cover letter required',
-    interviewDetail: null, interviewTime: null,
-    atsTarget: null, submittedAt: null,
-    exclusionReason: null,
-  },
-  {
-    id: '5',
-    company: { name: 'Notion',    initials: 'N', color: '#1C1C1E' },
-    title: 'Principal Designer',
-    workMode: 'Hybrid',
-    location: 'San Francisco, CA',
-    compensation: { base: '$200K', equity: '+$65K RSU' },
-    matchScore: 85,
-    status: 'Eligible',
-    priority: 'NORMAL',
-    interviewDetail: null, interviewTime: null,
-    atsTarget: null, submittedAt: null,
-    inputReason: null, exclusionReason: null,
-  },
-  {
-    id: '6',
-    company: { name: 'Vercel',    initials: 'V', color: '#000000' },
-    title: 'Staff Frontend Engineer',
-    workMode: 'Remote',
-    location: 'Remote, Global',
-    compensation: { base: '$185K', equity: '+$55K RSU' },
-    matchScore: 82,
-    status: 'Eligible',
-    priority: 'NORMAL',
-    interviewDetail: null, interviewTime: null,
-    atsTarget: null, submittedAt: null,
-    inputReason: null, exclusionReason: null,
-  },
-  {
-    id: '7',
-    company: { name: 'Atlassian', initials: 'A', color: '#0052CC' },
-    title: 'Senior UX Designer',
-    workMode: 'Remote',
-    location: 'Austin, TX',
-    compensation: { base: '$160K', equity: '+$30K RSU' },
-    matchScore: 79,
-    status: 'Needs Input',
-    priority: 'NORMAL',
-    inputReason: 'Missing portfolio URL',
-    interviewDetail: null, interviewTime: null,
-    atsTarget: null, submittedAt: null,
-    exclusionReason: null,
-  },
-  {
-    id: '8',
-    company: { name: 'Airbnb',    initials: 'A', color: '#FF5A5F' },
-    title: 'Lead Product Designer',
-    workMode: 'On-site',
-    location: 'San Francisco, CA',
-    compensation: { base: '$230K', equity: '+$90K RSU' },
-    matchScore: 61,
-    status: 'Not Eligible',
-    priority: 'LOW',
-    exclusionReason: 'Mandatory 5-day on-site',
-    interviewDetail: null, interviewTime: null,
-    atsTarget: null, submittedAt: null,
-    inputReason: null,
-  },
-];
-
-const MOCK_DASHBOARD = {
-  stats: {
-    totalPipeline:    { count: 48, weeklyDelta: '+6 this week', velocity: 79.2 },
-    eligibleApproved: { count: 32, sent: 24, queued: 8 },
-    actionRequired:   { count: 9 },
-    excluded:         { count: 7 },
-  },
-  pilot: {
-    active:     true,
-    profile:    'Senior Product Designer / Lead UX Engineer',
-    dailyQuota: { used: 15, total: 20 },
-  },
-  tabCounts: {
-    all: 48, eligible: 32, needsInput: 9, interviews: 4, highPriority: 6,
-  },
-  milestones: [
-    {
-      id: 'm1',
-      date: 'Oct 8',
-      company: 'Stripe',
-      companyColor: '#635BFF',
-      companyInitials: 'S',
-      title: 'Round 2 · Design Review',
-      host: 'Sarah Chen, Design Director',
-      time: '2:00 PM PST',
-    },
-    {
-      id: 'm2',
-      date: 'Oct 10',
-      company: 'Google',
-      companyColor: '#4285F4',
-      companyInitials: 'G',
-      title: 'System Design Interview',
-      host: 'Marcus Reid, Staff Engineer',
-      time: '11:00 AM PST',
-    },
-    {
-      id: 'm3',
-      date: 'Oct 12',
-      company: 'Figma',
-      companyColor: '#F24E1E',
-      companyInitials: 'F',
-      title: 'Final Panel · Culture Fit',
-      host: 'Design Leadership Team',
-      time: '3:30 PM PST',
-    },
-  ],
-  auditFeed: [
-    { id: 'a1', time: '2m ago',  type: 'submitted', text: 'CV tailored & submitted to Notion via Greenhouse' },
-    { id: 'a2', time: '14m ago', type: 'scraped',   text: '12 fresh targets scraped from LinkedIn & Wellfound' },
-    { id: 'a3', time: '31m ago', type: 'flagged',   text: 'Missing portfolio URL flagged — Atlassian paused' },
-    { id: 'a4', time: '1h ago',  type: 'submitted', text: 'CV tailored & submitted to Vercel via Lever' },
-    { id: 'a5', time: '2h ago',  type: 'filtered',  text: 'Location filter applied — 3 NYC roles excluded' },
-    { id: 'a6', time: '3h ago',  type: 'submitted', text: 'CV tailored & submitted to Linear via Ashby' },
-  ],
-  weeklyVelocity: { dispatched: 48, cap: 60 },
+const STUDENT_PROFILE = {
+  graduationYear: '2029',
+  branch: 'CSE',
+  cgpa: '9.2',
+  skills: ['JavaScript', 'React', 'Node.js', 'MongoDB', 'Git'],
 };
 
-// ─── API Functions ────────────────────────────────────────────────────────────
+const STUDENT_QUERY = new URLSearchParams({
+  graduationYear: STUDENT_PROFILE.graduationYear,
+  branch: STUDENT_PROFILE.branch,
+  cgpa: STUDENT_PROFILE.cgpa,
+  skills: STUDENT_PROFILE.skills.join(','),
+}).toString();
+
+const COMPANY_COLORS = [
+  '#2563EB',
+  '#7C3AED',
+  '#059669',
+  '#EA580C',
+  '#DB2777',
+  '#0891B2',
+];
 
 async function apiFetch(path, options = {}) {
   const token = localStorage.getItem('ap_token');
-  const res = await fetch(`${API_BASE}${path}`, {
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
     },
-    ...options,
   });
-  if (!res.ok) throw new Error(`API error ${res.status}`);
-  return res.json();
+
+  if (!response.ok) {
+    let message = `API request failed (${response.status})`;
+
+    try {
+      const errorData = await response.json();
+      message = errorData.message || message;
+    } catch {
+      // Keep the HTTP status message if the response isn't JSON.
+    }
+
+    throw new Error(message);
+  }
+
+  return response.json();
 }
 
 /**
- * Fetch dashboard stats, pilot config, milestones, and audit feed.
- * GET /api/applypilot/dashboard
+ * Fetch eligibility and matching results from the backend.
+ */
+async function fetchOpportunityResults() {
+  const data = await apiFetch(
+    `/api/opportunities/eligible?${STUDENT_QUERY}`
+  );
+
+  if (!data || data.success !== true) {
+    throw new Error(
+      data?.message || 'Unable to load opportunity results.'
+    );
+  }
+
+  return data;
+}
+
+/**
+ * Read the complete result list returned by the backend.
+ * The current API returns all results in `opportunities`.
+ */
+function getResultsList(data) {
+  if (Array.isArray(data.opportunities)) {
+    return data.opportunities;
+  }
+
+  if (Array.isArray(data.eligibleOpportunities)) {
+    return data.eligibleOpportunities;
+  }
+
+  return [];
+}
+
+function getEligibleCount(data, results) {
+  if (Number.isFinite(data.eligibleCount)) {
+    return data.eligibleCount;
+  }
+
+  return results.filter(result => result.eligible).length;
+}
+
+function getCompanyName(opportunity) {
+  return (
+    opportunity.company ||
+    opportunity.companyName ||
+    'Unknown company'
+  );
+}
+
+/**
+ * Convert one backend result into the shape expected by the UI.
+ */
+function mapOpportunityResult(result, index) {
+  const opportunity = result.opportunity || {};
+  const companyName = getCompanyName(opportunity);
+
+  const initials = companyName
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(word => word[0].toUpperCase())
+    .join('');
+
+  const stipend = Number(opportunity.stipend);
+  const hasStipend = Number.isFinite(stipend) && stipend > 0;
+  const eligible = result.eligible === true;
+
+  const reasons = Array.isArray(result.reasons)
+    ? result.reasons.filter(reason => typeof reason === 'string')
+    : [];
+
+  return {
+    id: String(opportunity._id || `opportunity-${index}`),
+
+    title: opportunity.title || 'Untitled opportunity',
+
+    company: {
+      name: companyName,
+      initials: initials || 'UC',
+      color: COMPANY_COLORS[index % COMPANY_COLORS.length],
+    },
+
+    location: opportunity.location || 'Location not specified',
+
+    // Missing work-mode information must not be presented as Remote.
+    workMode: opportunity.workMode || 'Not specified',
+
+    compensation: {
+      base: hasStipend
+        ? new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0,
+          }).format(stipend)
+        : 'Not listed',
+
+      equity: hasStipend
+        ? 'Listed stipend'
+        : 'Compensation not listed',
+    },
+
+    matchScore: Number.isFinite(Number(result.matchScore))
+      ? Number(result.matchScore)
+      : 0,
+
+    status: eligible ? 'Eligible' : 'Not Eligible',
+
+    priority:
+      Number(result.priorityScore) >= 70
+        ? 'HIGH'
+        : Number(result.priorityScore) >= 40
+          ? 'MEDIUM'
+          : 'LOW',
+
+    matchedSkills: Array.isArray(result.matchedSkills)
+      ? result.matchedSkills
+      : [],
+
+    missingSkills: Array.isArray(result.missingSkills)
+      ? result.missingSkills
+      : [],
+
+    exclusionReason: !eligible
+      ? (
+          reasons.length
+            ? reasons.join(' · ')
+            : 'Does not meet current eligibility criteria'
+        )
+      : undefined,
+  };
+}
+
+/**
+ * Dashboard statistics derived from the backend response.
+ *
+ * These are opportunity counts, not application submissions.
  */
 export const getDashboard = async () => {
-  if (useMock) { await mockDelay(); return MOCK_DASHBOARD; }
-  return apiFetch('/api/applypilot/dashboard');
+  const data = await fetchOpportunityResults();
+  const results = getResultsList(data);
+
+  const totalCount = Number.isFinite(data.totalOpportunities)
+    ? data.totalOpportunities
+    : results.length;
+
+  const eligibleCount = getEligibleCount(data, results);
+
+  const excludedCount = Math.max(0, totalCount - eligibleCount);
+
+  const highPriorityCount = results.filter(
+    result => Number(result.priorityScore) >= 70
+  ).length;
+
+  const eligibleRate = totalCount > 0
+    ? Math.round((eligibleCount / totalCount) * 100)
+    : 0;
+
+  return {
+    stats: {
+      totalPipeline: {
+        count: totalCount,
+        velocity: eligibleRate,
+      },
+
+      // Accurate name: these are eligible opportunities,
+      // not approved applications.
+      eligibleOpportunities: {
+        count: eligibleCount,
+      },
+
+      excluded: {
+        count: excludedCount,
+      },
+    },
+
+    tabCounts: {
+      all: results.length,
+      eligible: results.filter(result => result.eligible).length,
+      highPriority: highPriorityCount,
+    },
+  };
 };
 
 /**
- * Fetch all tracked applications.
- * GET /api/applypilot/applications
+ * Return opportunity-matching results for the existing table.
+ * This does not mean applications have been submitted.
  */
 export const getApplications = async () => {
-  if (useMock) { await mockDelay(400); return MOCK_APPLICATIONS; }
-  return apiFetch('/api/applypilot/applications');
-};
+  const data = await fetchOpportunityResults();
+  const results = getResultsList(data);
 
-/**
- * Toggle the autonomous pilot engine on/off.
- * POST /api/applypilot/pilot/toggle
- */
-export const togglePilot = async (active) => {
-  if (useMock) { await mockDelay(200); return { active }; }
-  return apiFetch('/api/applypilot/pilot/toggle', {
-    method: 'POST',
-    body: JSON.stringify({ active }),
-  });
+  return results.map(mapOpportunityResult);
 };

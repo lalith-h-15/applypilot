@@ -1,22 +1,46 @@
+
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  TrendingUp, CheckCircle2, AlertTriangle, XCircle,
-  ToggleLeft, ToggleRight, Pause, FileText, Zap,
-  Calendar, Clock, Search, Flame,
-  ArrowUpRight, RefreshCw, AlertCircle, MapPin,
+  TrendingUp,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  FileText,
+  Zap,
+  Calendar,
+  Search,
+  Flame,
+  RefreshCw,
+  AlertCircle,
+  MapPin,
 } from 'lucide-react';
-import { getDashboard, getApplications, togglePilot } from '../api/applypilot';
 
-// ═════════════════════════════════════════════════════════════════════════════
-// § 1  METRIC CARDS  (PRD §4.1 Executive Pipeline Intelligence)
-// ═════════════════════════════════════════════════════════════════════════════
+import { getDashboard, getApplications } from '../api/applypilot';
 
-const MetricCard = ({ icon: Icon, iconColor, label, primary, secondary, badge, badgeColor, delay }) => (
+// ─────────────────────────────────────────────────────────────────────────────
+// Metric cards
+// ─────────────────────────────────────────────────────────────────────────────
+
+const MetricCard = ({
+  icon: Icon,
+  iconColor,
+  label,
+  primary,
+  secondary,
+  badge,
+  badgeColor,
+  delay,
+}) => (
   <motion.div
     initial={{ opacity: 0, y: 14 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ type: 'spring', stiffness: 300, damping: 28, delay }}
+    transition={{
+      type: 'spring',
+      stiffness: 300,
+      damping: 28,
+      delay,
+    }}
     className="bg-[var(--bg-secondary)] rounded-ap-lg border border-[var(--separator)] p-4 flex flex-col gap-3"
     style={{ boxShadow: 'var(--shadow-card)' }}
   >
@@ -27,26 +51,45 @@ const MetricCard = ({ icon: Icon, iconColor, label, primary, secondary, badge, b
       >
         <Icon className="w-4.5 h-4.5" style={{ color: iconColor }} />
       </div>
+
       {badge && (
         <span
           className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-          style={{ background: `${badgeColor}12`, color: badgeColor }}
+          style={{
+            background: `${badgeColor}12`,
+            color: badgeColor,
+          }}
         >
           {badge}
         </span>
       )}
     </div>
+
     <div>
-      <p className="text-3xl font-black text-[var(--text-primary)] leading-none tabular-nums">{primary}</p>
-      <p className="text-xs text-ap-gray-500 font-medium mt-1 leading-snug">{label}</p>
-      {secondary && <p className="text-[11px] text-ap-gray-400 mt-0.5">{secondary}</p>}
+      <p className="text-3xl font-black text-[var(--text-primary)] leading-none tabular-nums">
+        {primary}
+      </p>
+
+      <p className="text-xs text-ap-gray-500 font-medium mt-1 leading-snug">
+        {label}
+      </p>
+
+      {secondary && (
+        <p className="text-[11px] text-ap-gray-400 mt-0.5">
+          {secondary}
+        </p>
+      )}
     </div>
   </motion.div>
 );
 
 const MetricCardSkeleton = () => (
-  <div className="bg-[var(--bg-secondary)] rounded-ap-lg border border-[var(--separator)] p-4 flex flex-col gap-3" style={{ boxShadow: 'var(--shadow-card)' }}>
+  <div
+    className="bg-[var(--bg-secondary)] rounded-ap-lg border border-[var(--separator)] p-4 flex flex-col gap-3"
+    style={{ boxShadow: 'var(--shadow-card)' }}
+  >
     <div className="skeleton w-9 h-9 rounded-ap" />
+
     <div className="space-y-2">
       <div className="skeleton h-8 w-14 rounded" />
       <div className="skeleton h-3 w-3/4 rounded" />
@@ -59,200 +102,197 @@ const MetricCardsRow = ({ stats, loading }) => {
   if (loading) {
     return (
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[0,1,2,3].map(i => <MetricCardSkeleton key={i} />)}
+        {[0, 1, 2, 3].map(index => (
+          <MetricCardSkeleton key={index} />
+        ))}
       </div>
     );
   }
+
   if (!stats) return null;
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       <MetricCard
-        icon={TrendingUp}    iconColor="#007AFF"
-        label="Total Pipeline"
+        icon={TrendingUp}
+        iconColor="#007AFF"
+        label="Total Opportunities"
         primary={stats.totalPipeline.count}
-        secondary={`${stats.totalPipeline.weeklyDelta} · ${stats.totalPipeline.velocity}% velocity`}
-        badge="↑ Active" badgeColor="#007AFF" delay={0.05}
+        secondary="Opportunities in the connected dataset"
+        badge="Local dataset"
+        badgeColor="#007AFF"
+        delay={0.05}
       />
+
       <MetricCard
-        icon={CheckCircle2}  iconColor="#34C759"
-        label="Eligible & Approved"
-        primary={stats.eligibleApproved.count}
-        secondary={`${stats.eligibleApproved.sent} sent · ${stats.eligibleApproved.queued} queued`}
-        badge="Approved" badgeColor="#34C759" delay={0.10}
+        icon={CheckCircle2}
+        iconColor="#34C759"
+        label="Eligible Opportunities"
+        primary={stats.eligibleOpportunities.count}
+        secondary="Based on the configured demo profile"
+        badge="Eligible"
+        badgeColor="#34C759"
+        delay={0.1}
       />
+
       <MetricCard
-        icon={AlertTriangle} iconColor="#FF9500"
-        label="Action Required"
-        primary={stats.actionRequired.count}
-        secondary="Needs manual review before dispatch"
-        badge="Needs Input" badgeColor="#FF9500" delay={0.15}
+        icon={AlertTriangle}
+        iconColor="#8E8E93"
+        label="Application Tracking"
+        primary="—"
+        secondary="Application submission and tracking are not implemented"
+        badge="Not available"
+        badgeColor="#8E8E93"
+        delay={0.15}
       />
+
       <MetricCard
-        icon={XCircle}       iconColor="#FF3B30"
-        label="Excluded / Blocked"
+        icon={XCircle}
+        iconColor="#FF3B30"
+        label="Not Eligible"
         primary={stats.excluded.count}
-        secondary="Filtered by autonomous screening rules"
-        badge="Blocked" badgeColor="#FF3B30" delay={0.20}
+        secondary="Does not meet current eligibility criteria"
+        badge="Ineligible"
+        badgeColor="#FF3B30"
+        delay={0.2}
       />
     </div>
   );
 };
 
-// ═════════════════════════════════════════════════════════════════════════════
-// § 2  PILOT ENGINE CONTROL STRIP  (PRD §4.2)
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+// Opportunity matching information
+// ─────────────────────────────────────────────────────────────────────────────
 
-const PilotEngineStrip = ({ pilot, loading, onToggle }) => {
-  if (loading) {
-    return (
-      <div className="bg-[var(--bg-secondary)] rounded-ap-lg border border-[var(--separator)] px-5 py-3.5" style={{ boxShadow: 'var(--shadow-card)' }}>
-        <div className="flex items-center gap-5">
-          <div className="skeleton w-12 h-7 rounded-full" />
-          <div className="skeleton h-4 w-64 rounded" />
-          <div className="flex-1 skeleton h-2 rounded-full" />
-        </div>
+const MatchingEnginePanel = ({ loading }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 14 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{
+      type: 'spring',
+      stiffness: 300,
+      damping: 28,
+      delay: 0.25,
+    }}
+    className="bg-[var(--bg-secondary)] rounded-ap-lg border border-[var(--separator)] px-5 py-4"
+    style={{ boxShadow: 'var(--shadow-card)' }}
+  >
+    <div className="flex items-center gap-3">
+      <div className="w-9 h-9 rounded-ap flex items-center justify-center bg-blue-500/10">
+        <Zap className="w-4 h-4 text-ap-blue" />
       </div>
-    );
-  }
-  if (!pilot) return null;
 
-  const pct = Math.round((pilot.dailyQuota.used / pilot.dailyQuota.total) * 100);
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-bold text-[var(--text-primary)]">
+          Opportunity Matching Engine
+        </p>
 
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 28, delay: 0.25 }}
-      className="bg-[var(--bg-secondary)] rounded-ap-lg border border-[var(--separator)] px-5 py-3.5"
-      style={{ boxShadow: 'var(--shadow-card)' }}
-    >
-      <div className="flex items-center gap-4 flex-wrap">
-
-        {/* Master engine toggle */}
-        <button
-          onClick={onToggle}
-          className="flex items-center gap-2 flex-shrink-0 group"
-        >
-          {pilot.active
-            ? <ToggleRight className="w-8 h-8 text-ap-green transition-transform group-hover:scale-105" />
-            : <ToggleLeft  className="w-8 h-8 text-ap-gray-300 transition-transform group-hover:scale-105" />}
-          <div>
-            <p className={`text-[11px] font-black tracking-widest ${pilot.active ? 'text-ap-green' : 'text-ap-gray-400'}`}>
-              AUTOPILOT {pilot.active ? 'ACTIVE' : 'PAUSED'}
-            </p>
-            <p className="text-[10px] text-ap-gray-400">Click to {pilot.active ? 'pause' : 'resume'}</p>
-          </div>
-        </button>
-
-        <div className="hidden sm:block w-px h-8 bg-[var(--separator)]" />
-
-        {/* Active targeting profile */}
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <Zap className="w-3.5 h-3.5 text-ap-blue flex-shrink-0" />
-          <div className="min-w-0">
-            <p className="text-[10px] text-ap-gray-400 font-medium uppercase tracking-wide">Active Profile</p>
-            <p className="text-xs font-semibold text-[var(--text-primary)] truncate">{pilot.profile}</p>
-          </div>
-        </div>
-
-        <div className="hidden lg:block w-px h-8 bg-[var(--separator)]" />
-
-        {/* Daily quota bar */}
-        <div className="flex-shrink-0">
-          <p className="text-[10px] text-ap-gray-400 font-medium uppercase tracking-wide mb-1">Daily Quota</p>
-          <div className="flex items-center gap-2">
-            <div className="w-32 h-1.5 bg-ap-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-ap-blue rounded-full transition-all duration-700"
-                style={{ width: `${pct}%` }}
-              />
-            </div>
-            <span className="text-xs font-bold text-[var(--text-primary)] tabular-nums">
-              {pilot.dailyQuota.used} / {pilot.dailyQuota.total}
-            </span>
-          </div>
-        </div>
-
-        {/* Quick actions */}
-        <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-          <button className="btn-ghost">
-            <Pause className="w-3 h-3" />
-            Pause Queue
-          </button>
-          <button className="btn-ghost">
-            <FileText className="w-3 h-3" />
-            Logs
-          </button>
-        </div>
+        <p className="text-[11px] text-ap-gray-400 mt-1">
+          {loading
+            ? 'Loading eligibility and skill-match results...'
+            : 'Eligibility, match scores, and priority are calculated by the backend using the configured demo profile.'}
+        </p>
       </div>
-    </motion.div>
-  );
-};
 
-// ═════════════════════════════════════════════════════════════════════════════
-// § 3  APPLICATION TABLE  (PRD §4.3)
-// ═════════════════════════════════════════════════════════════════════════════
+      <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-gray-500/10 text-ap-gray-500 whitespace-nowrap">
+        MVP Preview
+      </span>
+    </div>
+  </motion.div>
+);
 
-// Status badge display — maps backend status string to visual treatment
+// ─────────────────────────────────────────────────────────────────────────────
+// Opportunity table
+// ─────────────────────────────────────────────────────────────────────────────
+
 const STATUS = {
-  'Eligible':            { bg: 'bg-emerald-50 dark:bg-emerald-900/20', text: 'text-emerald-700 dark:text-emerald-400', border: 'border-emerald-200 dark:border-emerald-800' },
-  'Interview Scheduled': { bg: 'bg-blue-50 dark:bg-blue-900/20',       text: 'text-blue-700 dark:text-blue-400',       border: 'border-blue-200 dark:border-blue-800'     },
-  'Submitted':           { bg: 'bg-teal-50 dark:bg-teal-900/20',       text: 'text-teal-700 dark:text-teal-400',       border: 'border-teal-200 dark:border-teal-800'     },
-  'Needs Input':         { bg: 'bg-amber-50 dark:bg-amber-900/20',     text: 'text-amber-700 dark:text-amber-400',     border: 'border-amber-200 dark:border-amber-800'   },
-  'Not Eligible':        { bg: 'bg-red-50 dark:bg-red-900/20',         text: 'text-red-600 dark:text-red-400',         border: 'border-red-200 dark:border-red-800'       },
+  Eligible: {
+    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+    text: 'text-emerald-700 dark:text-emerald-400',
+    border: 'border-emerald-200 dark:border-emerald-800',
+  },
+  'Not Eligible': {
+    bg: 'bg-red-50 dark:bg-red-900/20',
+    text: 'text-red-600 dark:text-red-400',
+    border: 'border-red-200 dark:border-red-800',
+  },
 };
 
 const WORK_MODE = {
-  'Remote':  { bg: 'bg-emerald-50', text: 'text-emerald-600' },
-  'Hybrid':  { bg: 'bg-violet-50',  text: 'text-violet-600'  },
-  'On-site': { bg: 'bg-sky-50',     text: 'text-sky-600'     },
+  Remote: {
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-600',
+  },
+  Hybrid: {
+    bg: 'bg-violet-50',
+    text: 'text-violet-600',
+  },
+  'On-site': {
+    bg: 'bg-sky-50',
+    text: 'text-sky-600',
+  },
 };
 
-// Match score color — cosmetic only, value always from backend
-const matchStyle = (s) =>
-  s >= 90 ? 'bg-emerald-50 text-emerald-700' :
-  s >= 75 ? 'bg-blue-50 text-blue-700' :
-  s >= 60 ? 'bg-amber-50 text-amber-700' :
-            'bg-ap-gray-100 text-ap-gray-500';
+const matchStyle = score =>
+  score >= 90
+    ? 'bg-emerald-50 text-emerald-700'
+    : score >= 75
+      ? 'bg-blue-50 text-blue-700'
+      : score >= 60
+        ? 'bg-amber-50 text-amber-700'
+        : 'bg-ap-gray-100 text-ap-gray-500';
 
 const TableRowSkeleton = () => (
   <div className="flex items-center gap-4 px-4 py-3 border-b border-[var(--separator)]">
     <div className="skeleton w-8 h-8 rounded-ap flex-shrink-0" />
+
     <div className="flex-1 space-y-1.5">
       <div className="skeleton h-3 w-1/3 rounded" />
       <div className="skeleton h-2.5 w-1/5 rounded" />
     </div>
+
     <div className="skeleton h-3 w-24 rounded hidden lg:block" />
     <div className="skeleton h-6 w-10 rounded-lg" />
     <div className="skeleton h-5 w-24 rounded-full" />
-    <div className="skeleton w-4 h-4 rounded" />
   </div>
 );
 
 const TABS = [
-  { id: 'all',         label: 'All',          countKey: 'all'         },
-  { id: 'eligible',    label: 'Eligible',     countKey: 'eligible'    },
-  { id: 'needsInput',  label: 'Needs Input',  countKey: 'needsInput'  },
-  { id: 'interviews',  label: 'Interviews',   countKey: 'interviews'  },
-  { id: 'highPriority',label: 'High Priority',countKey: 'highPriority'},
+  { id: 'all', label: 'All', countKey: 'all' },
+  { id: 'eligible', label: 'Eligible', countKey: 'eligible' },
+  {
+    id: 'highPriority',
+    label: 'High Priority',
+    countKey: 'highPriority',
+  },
 ];
 
 const ApplicationTable = ({ applications, tabCounts, loading }) => {
-  const [tab,    setTab]    = useState('all');
+  const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
     let list = applications;
-    if (tab === 'eligible')     list = list.filter(a => a.status === 'Eligible');
-    if (tab === 'needsInput')   list = list.filter(a => a.status === 'Needs Input');
-    if (tab === 'interviews')   list = list.filter(a => a.status === 'Interview Scheduled');
-    if (tab === 'highPriority') list = list.filter(a => a.priority === 'HIGH');
-    if (search) {
-      const q = search.toLowerCase();
-      list = list.filter(a =>
-        a.title.toLowerCase().includes(q) || a.company.name.toLowerCase().includes(q)
-      );
+
+    if (tab === 'eligible') {
+      list = list.filter(item => item.status === 'Eligible');
     }
+
+    if (tab === 'highPriority') {
+      list = list.filter(item => item.priority === 'HIGH');
+    }
+
+    if (search.trim()) {
+      const query = search.trim().toLowerCase();
+
+      list = list.filter(item => {
+        const title = (item.title || '').toLowerCase();
+        const company = (item.company?.name || '').toLowerCase();
+
+        return title.includes(query) || company.includes(query);
+      });
+    }
+
     return list;
   }, [applications, tab, search]);
 
@@ -260,46 +300,61 @@ const ApplicationTable = ({ applications, tabCounts, loading }) => {
     <motion.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 28, delay: 0.30 }}
+      transition={{
+        type: 'spring',
+        stiffness: 300,
+        damping: 28,
+        delay: 0.3,
+      }}
       className="bg-[var(--bg-secondary)] rounded-ap-lg border border-[var(--separator)] overflow-hidden"
       style={{ boxShadow: 'var(--shadow-card)' }}
     >
-      {/* Table top bar */}
+      {/* Table heading and search */}
       <div className="px-4 pt-4 pb-3 border-b border-[var(--separator)]">
         <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
-          <h2 className="text-sm font-bold text-[var(--text-primary)]">Candidate Pipeline</h2>
+          <h2 className="text-sm font-bold text-[var(--text-primary)]">
+            Opportunity Matches
+          </h2>
+
           <div className="relative flex-1 max-w-xs">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-ap-gray-300 pointer-events-none" />
+
             <input
               type="text"
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={event => setSearch(event.target.value)}
               placeholder="Search role or company..."
+              aria-label="Search opportunities by role or company"
               className="w-full pl-8 pr-3 py-1.5 text-xs rounded-ap border border-[var(--separator)] bg-ap-gray-100 dark:bg-white/5 text-[var(--text-primary)] placeholder:text-ap-gray-300 focus:outline-none focus:border-ap-blue focus:ring-2 focus:ring-ap-blue/10 transition-all"
             />
           </div>
         </div>
 
-        {/* Segmented tabs (PRD §4.3) */}
+        {/* Working filters */}
         <div className="flex gap-1 overflow-x-auto no-scrollbar">
-          {TABS.map(t => (
+          {TABS.map(item => (
             <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
+              key={item.id}
+              type="button"
+              onClick={() => setTab(item.id)}
+              aria-pressed={tab === item.id}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ap text-xs font-semibold whitespace-nowrap transition-all flex-shrink-0 ${
-                tab === t.id
+                tab === item.id
                   ? 'bg-ap-blue text-white shadow-ap-sm'
                   : 'text-ap-gray-500 hover:bg-ap-gray-100 dark:hover:bg-white/5'
               }`}
             >
-              {t.label}
+              {item.label}
+
               {tabCounts && (
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                  tab === t.id
-                    ? 'bg-white/25 text-white'
-                    : 'bg-ap-gray-200 dark:bg-white/10 text-ap-gray-500'
-                }`}>
-                  {tabCounts[t.countKey] ?? 0}
+                <span
+                  className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                    tab === item.id
+                      ? 'bg-white/25 text-white'
+                      : 'bg-ap-gray-200 dark:bg-white/10 text-ap-gray-500'
+                  }`}
+                >
+                  {tabCounts[item.countKey] ?? 0}
                 </span>
               )}
             </button>
@@ -307,284 +362,312 @@ const ApplicationTable = ({ applications, tabCounts, loading }) => {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Opportunity table */}
       <div className="overflow-x-auto">
         <div className="min-w-[680px]">
-          {/* Column headers */}
           <div className="flex items-center gap-4 px-4 py-2 border-b border-[var(--separator)] bg-ap-gray-50 dark:bg-white/[0.02]">
             {[
-              { label: 'Company',     w: 'w-40 flex-shrink-0' },
-              { label: 'Role',        w: 'flex-1' },
-              { label: 'Comp',        w: 'w-28 flex-shrink-0 text-right hidden lg:block' },
-              { label: 'Match',       w: 'w-14 flex-shrink-0' },
-              { label: 'Status',      w: 'w-36 flex-shrink-0' },
-              { label: '',            w: 'w-8 flex-shrink-0' },
-            ].map((col, i) => (
-              <div key={i} className={col.w}>
-                <p className="text-[10px] font-bold text-ap-gray-400 uppercase tracking-wider">{col.label}</p>
+              { label: 'Company', width: 'w-40 flex-shrink-0' },
+              { label: 'Role', width: 'flex-1' },
+              {
+                label: 'Compensation',
+                width: 'w-28 flex-shrink-0 text-right hidden lg:block',
+              },
+              { label: 'Match', width: 'w-14 flex-shrink-0' },
+              { label: 'Eligibility', width: 'w-36 flex-shrink-0' },
+              { label: '', width: 'w-8 flex-shrink-0' },
+            ].map((column, index) => (
+              <div key={index} className={column.width}>
+                <p className="text-[10px] font-bold text-ap-gray-400 uppercase tracking-wider">
+                  {column.label}
+                </p>
               </div>
             ))}
           </div>
 
-          {/* Rows */}
-          {loading
-            ? Array.from({ length: 5 }).map((_, i) => <TableRowSkeleton key={i} />)
-            : filtered.length === 0
-              ? (
-                <div className="py-14 text-center">
-                  <p className="text-sm text-ap-gray-400">No applications match this filter.</p>
-                </div>
-              )
-              : (
-                <AnimatePresence>
-                  {filtered.map((app, i) => {
-                    const s  = STATUS[app.status]   ?? STATUS['Needs Input'];
-                    const wm = WORK_MODE[app.workMode] ?? WORK_MODE['Remote'];
-                    const detail = app.interviewDetail ?? app.inputReason ?? app.exclusionReason;
+          {loading ? (
+            Array.from({ length: 5 }).map((_, index) => (
+              <TableRowSkeleton key={index} />
+            ))
+          ) : filtered.length === 0 ? (
+            <div className="py-14 px-4 text-center">
+              <p className="text-sm text-ap-gray-400">
+                No opportunities match this filter.
+              </p>
+            </div>
+          ) : (
+            <AnimatePresence>
+              {filtered.map((item, index) => {
+                const statusStyle =
+                  STATUS[item.status] || STATUS['Not Eligible'];
 
-                    return (
-                      <motion.div
-                        key={app.id}
-                        initial={{ opacity: 0, x: -6 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 28, delay: i * 0.03 }}
-                        className="flex items-center gap-4 px-4 py-3 border-b border-[var(--separator)] last:border-none hover:bg-ap-gray-50 dark:hover:bg-white/[0.02] transition-colors cursor-default group"
+                const workModeStyle = WORK_MODE[item.workMode] || {
+                  bg: 'bg-ap-gray-100',
+                  text: 'text-ap-gray-500',
+                };
+
+                const detail = item.exclusionReason;
+                const matchedSkills = item.matchedSkills || [];
+                const missingSkills = item.missingSkills || [];
+
+                return (
+                  <motion.div
+                    key={item.id}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{
+                      type: 'spring',
+                      stiffness: 300,
+                      damping: 28,
+                      delay: index * 0.03,
+                    }}
+                    className="flex items-center gap-4 px-4 py-3 border-b border-[var(--separator)] last:border-none hover:bg-ap-gray-50 dark:hover:bg-white/[0.02] transition-colors"
+                  >
+                    {/* Company */}
+                    <div className="flex items-center gap-3 w-40 flex-shrink-0">
+                      <div
+                        className="w-8 h-8 rounded-ap flex items-center justify-center text-white text-xs font-black flex-shrink-0"
+                        style={{ background: item.company.color }}
                       >
-                        {/* Company */}
-                        <div className="flex items-center gap-3 w-40 flex-shrink-0">
-                          <div
-                            className="w-8 h-8 rounded-ap flex items-center justify-center text-white text-xs font-black flex-shrink-0"
-                            style={{ background: app.company.color }}
-                          >
-                            {app.company.initials}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-[var(--text-primary)] truncate">{app.company.name}</p>
-                            <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${wm.bg} ${wm.text}`}>
-                              {app.workMode}
-                            </span>
-                          </div>
-                        </div>
+                        {item.company.initials}
+                      </div>
 
-                        {/* Role + location */}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-[var(--text-primary)] truncate">{app.title}</p>
-                          <p className="text-[10px] text-ap-gray-400 flex items-center gap-1 mt-0.5">
-                            <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
-                            <span className="truncate">{app.location}</span>
-                          </p>
-                        </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                          {item.company.name}
+                        </p>
 
-                        {/* Compensation */}
-                        <div className="w-28 flex-shrink-0 text-right hidden lg:block">
-                          <p className="text-xs font-bold text-[var(--text-primary)]">{app.compensation.base}</p>
-                          <p className="text-[10px] text-ap-gray-400">{app.compensation.equity}</p>
-                        </div>
+                        <span
+                          className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-full ${workModeStyle.bg} ${workModeStyle.text}`}
+                        >
+                          {item.workMode}
+                        </span>
+                      </div>
+                    </div>
 
-                        {/* Match score */}
-                        <div className="w-14 flex-shrink-0">
-                          <span className={`text-xs font-black px-2 py-1 rounded-ap tabular-nums ${matchStyle(app.matchScore)}`}>
-                            {app.matchScore}%
-                          </span>
-                        </div>
+                    {/* Role, location and skill comparison */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-[var(--text-primary)] truncate">
+                        {item.title}
+                      </p>
 
-                        {/* Status */}
-                        <div className="w-36 flex-shrink-0">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${s.bg} ${s.text} ${s.border}`}>
-                            {app.status}
-                          </span>
-                          {detail && (
-                            <p className="text-[10px] text-ap-gray-400 mt-0.5 truncate">{detail}</p>
-                          )}
-                          {app.atsTarget && (
-                            <p className="text-[10px] text-ap-gray-400 mt-0.5">via {app.atsTarget}</p>
-                          )}
-                        </div>
+                      <p className="text-[10px] text-ap-gray-400 flex items-center gap-1 mt-0.5">
+                        <MapPin className="w-2.5 h-2.5 flex-shrink-0" />
+                        <span className="truncate">{item.location}</span>
+                      </p>
 
-                        {/* Priority flame + arrow */}
-                        <div className="w-8 flex-shrink-0 flex items-center justify-center gap-1">
-                          {app.priority === 'HIGH' && (
-                            <Flame className="w-3.5 h-3.5 text-orange-500" />
-                          )}
-                          <button className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <ArrowUpRight className="w-3.5 h-3.5 text-ap-gray-400 hover:text-ap-blue" />
-                          </button>
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
-              )
-          }
+                      {(matchedSkills.length > 0 ||
+                        missingSkills.length > 0) && (
+                        <p
+                          className="text-[10px] text-ap-gray-400 mt-1 truncate"
+                          title={[
+                            matchedSkills.length
+                              ? `Matched: ${matchedSkills.join(', ')}`
+                              : '',
+                            missingSkills.length
+                              ? `Missing: ${missingSkills.join(', ')}`
+                              : '',
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        >
+                          {matchedSkills.length > 0
+                            ? `Matched: ${matchedSkills.slice(0, 3).join(', ')}`
+                            : 'No matched skills'}
+
+                          {missingSkills.length > 0
+                            ? ` · Missing: ${missingSkills.slice(0, 3).join(', ')}`
+                            : ''}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Compensation */}
+                    <div className="w-28 flex-shrink-0 text-right hidden lg:block">
+                      <p className="text-xs font-bold text-[var(--text-primary)]">
+                        {item.compensation.base}
+                      </p>
+
+                      <p className="text-[10px] text-ap-gray-400">
+                        {item.compensation.equity}
+                      </p>
+                    </div>
+
+                    {/* Backend match score */}
+                    <div className="w-14 flex-shrink-0">
+                      <span
+                        className={`text-xs font-black px-2 py-1 rounded-ap tabular-nums ${matchStyle(item.matchScore)}`}
+                      >
+                        {item.matchScore}%
+                      </span>
+                    </div>
+
+                    {/* Eligibility */}
+                    <div className="w-36 flex-shrink-0">
+                      <span
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
+                      >
+                        {item.status}
+                      </span>
+
+                      {detail && (
+                        <p
+                          className="text-[10px] text-ap-gray-400 mt-0.5 truncate"
+                          title={detail}
+                        >
+                          {detail}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Priority indicator */}
+                    <div className="w-8 flex-shrink-0 flex items-center justify-center">
+                      {item.priority === 'HIGH' && (
+                        <Flame
+                          className="w-3.5 h-3.5 text-orange-500"
+                          aria-label="High priority"
+                        />
+                      )}
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </motion.div>
   );
 };
 
-// ═════════════════════════════════════════════════════════════════════════════
-// § 4  RIGHT CONTEXTUAL DRAWER  (PRD §4.4)
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+// Unimplemented integrations — transparently labelled
+// ─────────────────────────────────────────────────────────────────────────────
 
-const AUDIT_COLORS = {
-  submitted: '#34C759',
-  scraped:   '#007AFF',
-  flagged:   '#FF9500',
-  filtered:  '#8E8E93',
-};
-
-const MilestonesPanel = ({ milestones, loading }) => (
+const MilestonesPanel = ({ loading }) => (
   <motion.div
     initial={{ opacity: 0, x: 14 }}
     animate={{ opacity: 1, x: 0 }}
-    transition={{ type: 'spring', stiffness: 300, damping: 28, delay: 0.35 }}
+    transition={{
+      type: 'spring',
+      stiffness: 300,
+      damping: 28,
+      delay: 0.35,
+    }}
     className="bg-[var(--bg-secondary)] rounded-ap-lg border border-[var(--separator)] overflow-hidden"
     style={{ boxShadow: 'var(--shadow-card)' }}
   >
     <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--separator)]">
       <div className="flex items-center gap-2">
         <Calendar className="w-3.5 h-3.5 text-ap-blue" />
-        <h3 className="text-xs font-bold text-[var(--text-primary)]">Upcoming Milestones</h3>
+
+        <h3 className="text-xs font-bold text-[var(--text-primary)]">
+          Milestones
+        </h3>
       </div>
-      <button className="text-[10px] font-semibold text-ap-blue hover:opacity-70 transition-opacity">
-        Sync Calendar →
-      </button>
+
+      <span className="text-[10px] text-ap-gray-400">
+        MVP preview
+      </span>
     </div>
 
-    <div className="divide-y divide-[var(--separator)]">
-      {loading
-        ? [0,1,2].map(i => (
-            <div key={i} className="flex items-start gap-3 p-3">
-              <div className="skeleton w-10 h-10 rounded-ap flex-shrink-0" />
-              <div className="flex-1 space-y-1.5">
-                <div className="skeleton h-3 w-2/3 rounded" />
-                <div className="skeleton h-2.5 w-1/2 rounded" />
-                <div className="skeleton h-2.5 w-1/3 rounded" />
-              </div>
-            </div>
-          ))
-        : milestones?.map(m => (
-            <div
-              key={m.id}
-              className="flex items-start gap-3 p-3 hover:bg-ap-gray-50 dark:hover:bg-white/[0.02] transition-colors group cursor-default"
-            >
-              {/* Date badge */}
-              <div className="w-10 h-10 rounded-ap flex flex-col items-center justify-center flex-shrink-0 border border-[var(--separator)] bg-ap-gray-50 dark:bg-white/5">
-                <span className="text-[8px] font-bold text-ap-gray-400 uppercase">{m.date.split(' ')[0]}</span>
-                <span className="text-sm font-black text-[var(--text-primary)] leading-none">{m.date.split(' ')[1]}</span>
-              </div>
+    <div className="p-4">
+      {loading ? (
+        <div className="space-y-2">
+          <div className="skeleton h-3 w-2/3 rounded" />
+          <div className="skeleton h-3 w-full rounded" />
+        </div>
+      ) : (
+        <>
+          <p className="text-xs font-semibold text-[var(--text-primary)]">
+            Calendar integration is not available yet.
+          </p>
 
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <div className="w-2 h-2 rounded-sm flex-shrink-0" style={{ background: m.companyColor }} />
-                  <p className="text-[10px] font-bold text-ap-gray-400">{m.company}</p>
-                </div>
-                <p className="text-xs font-semibold text-[var(--text-primary)] leading-snug">{m.title}</p>
-                <p className="text-[10px] text-ap-gray-400 mt-0.5 truncate">{m.host}</p>
-                <p className="text-[10px] font-semibold text-ap-blue flex items-center gap-1 mt-1">
-                  <Clock className="w-2.5 h-2.5" />
-                  {m.time}
-                </p>
-              </div>
-
-              <button className="opacity-0 group-hover:opacity-100 transition-opacity w-6 h-6 rounded-ap bg-ap-blue flex items-center justify-center flex-shrink-0">
-                <ArrowUpRight className="w-3 h-3 text-white" />
-              </button>
-            </div>
-          ))}
+          <p className="text-[11px] text-ap-gray-400 mt-1">
+            No scheduled milestones are connected to the demo.
+          </p>
+        </>
+      )}
     </div>
   </motion.div>
 );
 
-const AuditFeedPanel = ({ feed, velocity, loading }) => (
+const AuditFeedPanel = ({ loading }) => (
   <motion.div
     initial={{ opacity: 0, x: 14 }}
     animate={{ opacity: 1, x: 0 }}
-    transition={{ type: 'spring', stiffness: 300, damping: 28, delay: 0.42 }}
+    transition={{
+      type: 'spring',
+      stiffness: 300,
+      damping: 28,
+      delay: 0.42,
+    }}
     className="bg-[var(--bg-secondary)] rounded-ap-lg border border-[var(--separator)] overflow-hidden"
     style={{ boxShadow: 'var(--shadow-card)' }}
   >
     <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--separator)]">
       <div className="flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-ap-green animate-pulse flex-shrink-0" />
-        <h3 className="text-xs font-bold text-[var(--text-primary)]">Live Audit Feed</h3>
+        <FileText className="w-3.5 h-3.5 text-ap-blue" />
+
+        <h3 className="text-xs font-bold text-[var(--text-primary)]">
+          Activity &amp; Audit Log
+        </h3>
       </div>
-      <button className="text-[10px] font-semibold text-ap-blue hover:opacity-70 transition-opacity">
-        View all logs →
-      </button>
+
+      <span className="text-[10px] text-ap-gray-400">
+        MVP preview
+      </span>
     </div>
 
-    <div className="divide-y divide-[var(--separator)]">
-      {loading
-        ? [0,1,2,3].map(i => (
-            <div key={i} className="flex items-start gap-2.5 px-4 py-2.5">
-              <div className="skeleton w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" />
-              <div className="flex-1 space-y-1">
-                <div className="skeleton h-2.5 w-full rounded" />
-                <div className="skeleton h-2 w-1/4 rounded" />
-              </div>
-            </div>
-          ))
-        : feed?.map(event => (
-            <div key={event.id} className="flex items-start gap-2.5 px-4 py-2.5">
-              <div
-                className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
-                style={{ background: AUDIT_COLORS[event.type] ?? '#8E8E93' }}
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] text-[var(--text-primary)] font-medium leading-snug">{event.text}</p>
-                <p className="text-[10px] text-ap-gray-400 mt-0.5">{event.time}</p>
-              </div>
-            </div>
-          ))}
-    </div>
+    <div className="p-4">
+      {loading ? (
+        <div className="space-y-2">
+          <div className="skeleton h-3 w-full rounded" />
+          <div className="skeleton h-3 w-2/3 rounded" />
+        </div>
+      ) : (
+        <>
+          <p className="text-xs font-semibold text-[var(--text-primary)]">
+            Activity logging is not implemented yet.
+          </p>
 
-    {/* Weekly Dispatch Velocity */}
-    {velocity && (
-      <div className="px-4 py-3 border-t border-[var(--separator)] bg-ap-gray-50 dark:bg-white/[0.02]">
-        <div className="flex justify-between items-center mb-1.5">
-          <p className="text-[10px] font-bold text-ap-gray-400 uppercase tracking-wide">Weekly Dispatch</p>
-          <span className="text-[10px] font-bold text-[var(--text-primary)] tabular-nums">
-            {velocity.dispatched} / {velocity.cap}
-          </span>
-        </div>
-        <div className="h-1.5 bg-ap-gray-200 dark:bg-white/10 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-ap-green rounded-full"
-            style={{ width: `${Math.round((velocity.dispatched / velocity.cap) * 100)}%` }}
-          />
-        </div>
-        <p className="text-[10px] text-ap-gray-400 mt-1 flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-ap-green inline-block" />
-          Safe cadence active · anti-bot pacing ON
-        </p>
-      </div>
-    )}
+          <p className="text-[11px] text-ap-gray-400 mt-1">
+            This panel will display recorded events once an audit log is connected.
+          </p>
+        </>
+      )}
+    </div>
   </motion.div>
 );
 
-// ═════════════════════════════════════════════════════════════════════════════
-// PAGE ROOT
-// ═════════════════════════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────────────────────
+// Dashboard root
+// ─────────────────────────────────────────────────────────────────────────────
 
 const Dashboard = () => {
-  const [dashData,     setDashData]     = useState(null);
+  const [dashData, setDashData] = useState(null);
   const [applications, setApplications] = useState([]);
-  const [dashLoading,  setDashLoading]  = useState(true);
-  const [appsLoading,  setAppsLoading]  = useState(true);
-  const [error,        setError]        = useState(null);
-  const [pilotActive,  setPilotActive]  = useState(true);
+  const [dashLoading, setDashLoading] = useState(true);
+  const [appsLoading, setAppsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const loadAll = async () => {
     try {
-      const [dash, apps] = await Promise.all([getDashboard(), getApplications()]);
-      setDashData(dash);
-      setPilotActive(dash.pilot.active);
-      setApplications(apps);
+      const [dashboard, opportunities] = await Promise.all([
+        getDashboard(),
+        getApplications(),
+      ]);
+
+      setDashData(dashboard);
+      setApplications(opportunities);
       setError(null);
-    } catch {
-      setError('Unable to load dashboard. Please try again.');
+    } catch (err) {
+      console.error('Failed to load ApplyPilot dashboard:', err);
+
+      setError(
+        'Unable to load dashboard data. Check that the backend is running and try again.'
+      );
     } finally {
       setDashLoading(false);
       setAppsLoading(false);
@@ -595,27 +678,27 @@ const Dashboard = () => {
     setDashLoading(true);
     setAppsLoading(true);
     setError(null);
+
     void loadAll();
   };
 
-  useEffect(() => { void loadAll(); }, []);
-
-  const handleTogglePilot = async () => {
-    const next = !pilotActive;
-    setPilotActive(next);               // optimistic
-    try { await togglePilot(next); }
-    catch { setPilotActive(!next); }   // revert on error
-  };
+  useEffect(() => {
+    void loadAll();
+  }, []);
 
   return (
     <div className="p-5 lg:p-6 space-y-5 pb-24 md:pb-8">
-
-      {/* Error banner */}
+      {/* Error and retry */}
       {error && (
         <div className="flex items-center gap-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-ap-lg p-3.5">
           <AlertCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
-          <p className="text-xs text-red-600 dark:text-red-400 font-medium flex-1">{error}</p>
+
+          <p className="text-xs text-red-600 dark:text-red-400 font-medium flex-1">
+            {error}
+          </p>
+
           <button
+            type="button"
             onClick={retryLoad}
             className="flex items-center gap-1.5 text-xs font-semibold text-red-600 dark:text-red-400 hover:opacity-70"
           >
@@ -625,21 +708,18 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* § 1 — Metric Cards */}
-      <MetricCardsRow stats={dashData?.stats} loading={dashLoading} />
-
-      {/* § 2 — Pilot Engine Strip */}
-      <PilotEngineStrip
-        pilot={dashData ? { ...dashData.pilot, active: pilotActive } : null}
+      {/* Metric cards */}
+      <MetricCardsRow
+        stats={dashData?.stats}
         loading={dashLoading}
-        onToggle={handleTogglePilot}
       />
 
-      {/* § 3 + 4 — Table + Right Drawer */}
-      <div className="flex gap-5 items-start">
+      {/* Matching engine */}
+      <MatchingEnginePanel loading={dashLoading} />
 
-        {/* Application Table (flex-1) */}
-        <div className="flex-1 min-w-0">
+      {/* Opportunity table and contextual panels */}
+      <div className="flex flex-col xl:flex-row gap-5 items-start">
+        <div className="flex-1 min-w-0 w-full">
           <ApplicationTable
             applications={applications}
             tabCounts={dashData?.tabCounts}
@@ -647,19 +727,11 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Right Contextual Drawer — shown beside table on xl screens */}
-        <div className="hidden xl:flex flex-col gap-4 w-72 flex-shrink-0">
-          <MilestonesPanel milestones={dashData?.milestones} loading={dashLoading} />
-          <AuditFeedPanel  feed={dashData?.auditFeed} velocity={dashData?.weeklyVelocity} loading={dashLoading} />
+        <div className="flex flex-col gap-4 w-full xl:w-72 xl:flex-shrink-0">
+          <MilestonesPanel loading={dashLoading} />
+          <AuditFeedPanel loading={dashLoading} />
         </div>
       </div>
-
-      {/* Drawer stacked below on smaller screens */}
-      <div className="xl:hidden grid grid-cols-1 md:grid-cols-2 gap-4">
-        <MilestonesPanel milestones={dashData?.milestones} loading={dashLoading} />
-        <AuditFeedPanel  feed={dashData?.auditFeed} velocity={dashData?.weeklyVelocity} loading={dashLoading} />
-      </div>
-
     </div>
   );
 };
