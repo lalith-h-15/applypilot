@@ -77,3 +77,6 @@ src/
   App.jsx                   Application routes
   main.jsx                  Frontend entry point
 ```
+When backend is ready
+Open src/api/applypilot.js and change one line:
+const useMock = false; // ← flip this
