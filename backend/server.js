@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 
 const connectDB = require("./config/db");
 const opportunityRoutes = require("./routes/opportunityRoutes");
+const applicationRoutes = require("./routes/applicationRoutes");
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api/opportunities", opportunityRoutes);
+app.use("/api/applications", applicationRoutes);
 
 // Connect MongoDB
 connectDB();
