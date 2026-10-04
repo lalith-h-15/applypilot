@@ -16,8 +16,12 @@ import {
   MapPin,
 } from 'lucide-react';
 
-import { getDashboard, getApplications } from '../api/applypilot';
-
+import {
+  getDashboard,
+  getApplications,
+  getTrackedApplications,
+  saveOpportunityToTracker,
+} from '../api/applypilot';
 // ─────────────────────────────────────────────────────────────────────────────
 // Metric cards
 // ─────────────────────────────────────────────────────────────────────────────
@@ -270,6 +274,54 @@ const TABS = [
 const ApplicationTable = ({ applications, tabCounts, loading }) => {
   const [tab, setTab] = useState('all');
   const [search, setSearch] = useState('');
+  const [savedIds, setSavedIds] = useState(new Set());
+const [savingId, setSavingId] = useState(null);
+const [saveMessage, setSaveMessage] = useState('');
+
+useEffect(() => {
+  let active = true;
+
+  getTrackedApplications()
+    .then((tracked) => {
+      if (!active) return;
+
+      setSavedIds(
+        new Set(
+          tracked
+            .map((app) => app.opportunity?._id)
+            .filter(Boolean)
+            .map(String)
+        )
+      );
+    })
+    .catch((error) => {
+      console.error('Could not load saved applications:', error);
+    });
+
+  return () => {
+    active = false;
+  };
+}, []);
+
+async function handleSave(item) {
+  if (!/^[a-f\d]{24}$/i.test(item.id)) {
+    setSaveMessage('This opportunity has no valid database ID.');
+    return;
+  }
+
+  setSavingId(item.id);
+  setSaveMessage('');
+
+  try {
+    await saveOpportunityToTracker(item.id);
+    setSavedIds((current) => new Set([...current, item.id]));
+    setSaveMessage(`${item.title} saved successfully.`);
+  } catch (error) {
+    setSaveMessage(error.message || 'Could not save this opportunity.');
+  } finally {
+    setSavingId(null);
+  }
+}
 
   const filtered = useMemo(() => {
     let list = applications;
@@ -310,6 +362,11 @@ const ApplicationTable = ({ applications, tabCounts, loading }) => {
       style={{ boxShadow: 'var(--shadow-card)' }}
     >
       {/* Table heading and search */}
+      {saveMessage && (
+  <p role="status" className="px-4 pt-3 text-xs text-[var(--text-primary)]">
+    {saveMessage}
+  </p>
+)}
       <div className="px-4 pt-4 pb-3 border-b border-[var(--separator)]">
         <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
           <h2 className="text-sm font-bold text-[var(--text-primary)]">
@@ -521,15 +578,28 @@ const ApplicationTable = ({ applications, tabCounts, loading }) => {
                       )}
                     </div>
 
-                    {/* Priority indicator */}
-                    <div className="w-8 flex-shrink-0 flex items-center justify-center">
-                      {item.priority === 'HIGH' && (
-                        <Flame
-                          className="w-3.5 h-3.5 text-orange-500"
-                          aria-label="High priority"
-                        />
-                      )}
-                    </div>
+                   {/* Priority and application tracking */}
+<div className="w-28 flex-shrink-0 flex items-center justify-end gap-2">
+  {item.priority === 'HIGH' && (
+    <Flame
+      className="w-3.5 h-3.5 text-orange-500"
+      aria-label="High priority"
+    />
+  )}
+
+  <button
+    type="button"
+    disabled={savingId === item.id || savedIds.has(item.id)}
+    onClick={() => handleSave(item)}
+    className="rounded-lg bg-blue-600 px-2.5 py-1.5 text-[10px] font-semibold text-white disabled:opacity-50"
+  >
+    {savedIds.has(item.id)
+      ? 'Saved'
+      : savingId === item.id
+        ? 'Saving...'
+        : 'Save'}
+  </button>
+</div>
                   </motion.div>
                 );
               })}

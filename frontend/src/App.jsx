@@ -9,6 +9,7 @@ import Applications   from './pages/Applications';
 import MatchFeed      from './pages/MatchFeed';
 import AutoApplyQueue from './pages/AutoApplyQueue';
 import Analytics      from './pages/Analytics';
+import OpportunityDetail from './pages/OpportunityDetail/OpportunityDetail';
 
 /**
  * App — root router for ApplyPilot.
@@ -38,6 +39,7 @@ const App = () => {
           <Route path="/match-feed"      element={<MatchFeed />}      />
           <Route path="/auto-apply"      element={<AutoApplyQueue />} />
           <Route path="/analytics"       element={<Analytics />}      />
+          <Route path="/opportunity/:id" element={<OpportunityDetail />} />
           {/* Catch-all */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

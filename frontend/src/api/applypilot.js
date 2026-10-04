@@ -250,9 +250,52 @@ export const getDashboard = async () => {
  * Return opportunity-matching results for the existing table.
  * This does not mean applications have been submitted.
  */
+
+/**
+ * Return opportunity-matching results for the existing dashboard.
+ */
 export const getApplications = async () => {
   const data = await fetchOpportunityResults();
   const results = getResultsList(data);
-
   return results.map(mapOpportunityResult);
+};
+
+/**
+ * Saved application tracker API.
+ */
+export const getTrackedApplications = async () => {
+  const data = await apiFetch("/api/applications");
+
+  if (!data.success) {
+    throw new Error(data.message || "Failed to load applications");
+  }
+
+  return data.applications || [];
+};
+
+export const saveOpportunityToTracker = async (opportunityId) => {
+  const data = await apiFetch(
+    `/api/applications/${encodeURIComponent(opportunityId)}/save`,
+    { method: "POST" }
+  );
+
+  return data.application;
+};
+
+export const updateTrackedApplication = async (
+  applicationId,
+  updates
+) => {
+  const data = await apiFetch(`/api/applications/${applicationId}`, {
+    method: "PATCH",
+    body: JSON.stringify(updates),
+  });
+
+  return data.application;
+};
+
+export const deleteTrackedApplication = async (applicationId) => {
+  return apiFetch(`/api/applications/${applicationId}`, {
+    method: "DELETE",
+  });
 };
